@@ -18,7 +18,7 @@ struct ContentView: View {
                             VStack(alignment: .leading) {
                                 Text(item.name)
                                     .font(.headline)
-                                Text("Price: $\(item.price, specifier: "%.2f")")
+                                Text("Price: $\(item.price, specifier: "%.2f")") //specifier ensures that it has 2 decimal points
                                     .font(.subheadline)
                                 Text("Stock: \(item.stock)")
                                     .font(.footnote)
@@ -39,7 +39,7 @@ struct ContentView: View {
             .onAppear {
                 Task { await fetchData() }
             }
-            .alert("Error", isPresented: Binding<Bool>(
+            .alert("Error", isPresented: Binding<Bool>( //this will display an alert if there is an error and clear it when okay is clicked
                 get: { errorMessage != nil },
                 set: { if !$0 { errorMessage = nil } }
             )) {
@@ -53,13 +53,13 @@ struct ContentView: View {
     }
 
     private func fetchData() async {
-        guard let url = URL(string: APIConfig.baseURL) else {
+        guard let url = URL(string: APIConfig.baseURL) else { //if no url then stop and display
             errorMessage = "Invalid URL"
             return
         }
 
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
+        var request = URLRequest(url: url) //get the url to send the request to
+        request.httpMethod = "POST" //setup the request
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
 
         let requestBody: [String: Any] = [
@@ -67,19 +67,19 @@ struct ContentView: View {
             "method": "getAllItems",
             "id": APIConfig.requestID
         ]
-        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody)
+        request.httpBody = try? JSONSerialization.data(withJSONObject: requestBody) //convert the request to json
 
         isFetching = true
-        defer { isFetching = false }
+        defer { isFetching = false } //defer will run just before the function closes
 
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            let (data, response) = try await URLSession.shared.data(for: request) //send the request and get the response
+            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else { //if the response is not 200 then stop and display error
                 errorMessage = "Invalid server response"
                 return
             }
 
-            if let jsonString = String(data: data, encoding: .utf8) {
+            if let jsonString = String(data: data, encoding: .utf8) { //print the response if one is given
                 print("Raw JSON response: \(jsonString)")
             }
 
@@ -100,23 +100,23 @@ struct ContentView: View {
                     else {
                         return nil
                     }
-                    return AudioItem(id: id, name: name, description: description, price: price, stock: stock, image: image)
+                    return AudioItem(id: id, name: name, description: description, price: price, stock: stock, image: image) //return the parsed data
                 }
-                DispatchQueue.main.async {
-                    withAnimation {
+                DispatchQueue.main.async { //tell the os to run this on the main thread, as otherwise UI won't update properly
+                    withAnimation { //this will animate the items being updated
                         self.items = parsedItems
                     }
                 }
-            } else {
+            } else { //if the json is not valid then display error
                 errorMessage = "Failed to parse JSON"
             }
-        } catch {
+        } catch { //if there is an error then display it
             errorMessage = "Error fetching data: \(error.localizedDescription)"
         }
     }
 }
 
-struct ItemDetailView: View {
+struct ItemDetailView: View { //view for the individual item
     let item: AudioItem
 
     var body: some View {
@@ -145,7 +145,7 @@ struct ItemDetailView: View {
     }
 }
 
-struct AudioItem: Identifiable, Codable {
+struct AudioItem: Identifiable, Codable { //struct for the audio item
     let id: Int
     let name: String
     let description: String
@@ -154,7 +154,7 @@ struct AudioItem: Identifiable, Codable {
     let image: String
     
     // Default initializer for manual initialization
-    init(id: Int, name: String, description: String, price: Double, stock: Int, image: String) {
+    init(id: Int, name: String, description: String, price: Double, stock: Int, image: String) { //this is used whenever the struct is initialized manually
         self.id = id
         self.name = name
         self.description = description
