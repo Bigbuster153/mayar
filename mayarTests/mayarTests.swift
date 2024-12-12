@@ -196,56 +196,36 @@ final class mayarTests: XCTestCase {
         let result: [AudioItem]
     }
 
-    
     func testLargeNumberOfItemsParsing() throws {
-        // Extreme test: Test parsing a large array of items
+        // Extreme test: Test parsing a large array of 1 million items
         
-        // Arrange: Create a large JSON array
-        let largeJSON = """
-        {
-            "result": [
-                {"id": 1, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 2, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 3, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 4, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 5, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 6, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 7, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 8, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 9, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 10, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 11, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 12, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 13, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 14, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 15, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 16, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 17, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 18, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 19, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 20, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 21, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 22, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 23, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 24, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 25, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 26, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 27, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"},
-                {"id": 28, "name": "Item 1", "description": "Item description", "price": 100.00, "stock": 10, "image": "image1.jpg"},
-                {"id": 29, "name": "Item 2", "description": "Item description", "price": 100.00, "stock": 10, "image": "image2.jpg"},
-                {"id": 30, "name": "Item 3", "description": "Item description", "price": 100.00, "stock": 10, "image": "image3.jpg"}
-            ]
+        // Arrange: Dynamically create a large JSON array with 1 million items
+        let itemCount = 1_000_000
+        var jsonString = "{ \"result\": ["
+        
+        // Generate items
+        for i in 1...itemCount {
+            jsonString += """
+            {"id": \(i), "name": "Item \(i)", "description": "Item description", "price": 100.00, "stock": 10, "image": "image\(i % 3 + 1).jpg"}\(i == itemCount ? "" : ",")
+            """
         }
-        """.data(using: .utf8)!
+        
+        jsonString += "]}"
+        
+        guard let largeJSON = jsonString.data(using: .utf8) else {
+            XCTFail("Failed to create JSON data")
+            return
+        }
         
         // Act
-            do {
-                let response = try JSONDecoder().decode(ItemResponse.self, from: largeJSON)
-                
-                // Assert
-                XCTAssertEqual(response.result.count, 30, "There should be 30 items in the result array")
-            } catch {
-                XCTFail("Failed to parse large JSON array: \(error)")
-            }
+        do {
+            // Decode the large JSON data
+            let response = try JSONDecoder().decode(ItemResponse.self, from: largeJSON)
+            
+            // Assert
+            XCTAssertEqual(response.result.count, itemCount, "There should be \(itemCount) items in the result array")
+        } catch {
+            XCTFail("Failed to parse large JSON array: \(error)")
         }
+    }
 }
