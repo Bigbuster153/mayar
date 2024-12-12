@@ -32,7 +32,12 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem {
                     Button(action: { Task { await fetchData() } }) {
-                        Label("Fetch Items", systemImage: "arrow.down")
+                        Label("Fetch Items", systemImage: "arrow.counterclockwise.circle")
+                    }
+                }
+                ToolbarItem{
+                    Button(action: { Task { await fetchData() } }) {
+                        Label("Search", systemImage: "magnifyingglass")
                     }
                 }
             }
@@ -116,18 +121,28 @@ struct ContentView: View {
     }
 }
 
-struct ItemDetailView: View { //view for the individual item
+struct ItemDetailView: View {
     let item: AudioItem
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                AsyncImage(url: URL(string: "\(APIConfig.baseImageURL)\(item.image)")) { image in
-                    image.resizable()
-                        .aspectRatio(contentMode: .fit)
-                } placeholder: {
-                    Color.gray
+                // Display the image
+                if URL(string: "\(APIConfig.baseImageURL)\(item.image)") != nil {
+                    AsyncImage(url: URL(string: "\(APIConfig.baseImageURL)\(item.image)")) { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 500, maxHeight: 500) // Limit the size
+                    } placeholder: {
+                        Color.gray
+                            .frame(maxWidth: 500, maxHeight: 500) // Match placeholder size
+                    }
+                } else {
+                    Text("Image not available")
+                        .foregroundColor(.secondary)
                 }
+
+                // Display the item's details
                 Text(item.name)
                     .font(.largeTitle)
                     .bold()
@@ -166,7 +181,7 @@ struct AudioItem: Identifiable, Codable { //struct for the audio item
 
 struct APIConfig {
     static let baseURL = "https://mayar.abertay.ac.uk/~2202089/cmp306/coursework/block1/AudioEquipment/model/index.php"
-    static let baseImageURL = "https://mayar.abertay.ac.uk/images/"
+    static let baseImageURL = "https://mayar.abertay.ac.uk/~2202089/cmp306/coursework/block1/AudioEquipment/image/"
     static let requestID = "510573"
 }
 
