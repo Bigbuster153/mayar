@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ContentView: View {
+    
+    //global variables
     @State private var items: [AudioItem] = [] // List of items fetched from the server
     @State private var isFetching = false // Flag to indicate if data is being fetched
     @State private var errorMessage: String? // Error message to display in an alert
@@ -9,6 +11,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView {
             VStack {
+                
                 // Search input field
                 TextField("Enter ID to search", text: $searchID)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -62,7 +65,7 @@ struct ContentView: View {
         }
     }
     
-    private func fetchData() async { //fetch data from the server
+    public func fetchData() async { //fetch data from the server
         
         guard let url = URL(string: APIConfig.baseURL) else { //check if the url is valid
             errorMessage = "Invalid URL"
